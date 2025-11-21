@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SilaMo DaTa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3/dist/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cordes-blue': '#1e40af',
+                        'cordes-dark': '#1e293b',
+                        'cordes-light': '#f8fafc',
+                        'cordes-accent': '#3b82f6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-200 shadow-md z-50">
+        <!-- Header -->
+        <div class="flex items-center justify-center h-20 bg-gradient-to-r from-blue-600 to-indigo-600">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow">
+                    <i class="fas fa-database text-indigo-600 text-xl"></i>
+                </div>
+                <span class="text-white text-2xl font-semibold tracking-wide">SilaMo DaTa</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="mt-6 px-6">
+            <ul class="space-y-1">
+                <li>
+                    <a href="/"
+                        class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-md transition group">
+                        <i class="fas fa-home mr-3 text-indigo-400 group-hover:text-indigo-600"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="/pengusaha"
+                        class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-md transition group">
+                        <i class="fas fa-user-tie mr-3 text-gray-400 group-hover:text-indigo-600"></i>
+                        Daftar Pengusaha
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/app/transaksipajak/"
+                        target="_blank"
+                        class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-md transition group">
+                        <i class="fas fa-file-alt mr-3 text-gray-400 group-hover:text-indigo-600"></i>
+                        Data Transaksi
+                    </a>
+                </li>
+                <li>
+                    <a href="/wilaya"
+                        class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-md transition group">
+                        <i class="fas fa-map-marked-alt mr-3 text-gray-400 group-hover:text-indigo-600"></i>
+                        Wilayah
+                    </a>
+                </li>
+                <li>
+                    <a href="/denda"
+                        class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-md transition group">
+                        <i class="fas fa-money-bill-wave mr-3 text-gray-400 group-hover:text-indigo-600"></i>
+                        Denda
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/auth/user/"
+                        target="_blank"
+                        class="flex items-center px-4 py-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-md transition group">
+                        <i class="fas fa-file-alt mr-3 text-gray-400 group-hover:text-indigo-600"></i>
+                        User
+                    </a>
+                </li>
+                <li>
+                    <form method="post" action="/logout/" class="w-full">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-md transition group">
+                            <i class="fas fa-sign-out-alt mr-3 text-gray-400 group-hover:text-red-600"></i>
+                            Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- User Info -->
+        <div class="absolute bottom-4 left-6 right-6">
+            <div class="bg-gray-100 rounded-lg p-4 flex items-center space-x-3 shadow-sm">
+                <img src="https://cdn-icons-png.flaticon.com/512/17003/17003310.png" alt="Admin"
+                    class="w-10 h-10 rounded-full border border-gray-300">
+                <div>
+                    <p class="text-gray-800 text-sm font-semibold">{{ user.username }}</p>
+                    <p class="text-gray-500 text-xs">Administrator</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-72 min-h-screen bg-gray-50">
+        <!-- Top Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-gray-900">Sistem Evaluasi dan Monitoring Perda
+                            Terintegrasi</h1>
+                        <p class="text-gray-600 text-sm mt-1">Identifikasi potensi baru Pendapatan Asli Daerah (PAD)</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <i
+                                class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" placeholder="Search..."
+                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none">
+                        </div>
+                        <div class="relative">
+                            <button
+                                class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                                <i class="fas fa-bell text-xl"></i>
+                                <span
+                                    class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Content -->
+        <main class="p-6">
+            {% block content %}
+            <!-- Example Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-5 rounded-lg shadow hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Total Pengusaha</p>
+                            <h2 class="text-2xl font-bold text-gray-800">1,245</h2>
+                        </div>
+                        <i class="fas fa-user-tie text-indigo-500 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-lg shadow hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Transaksi Bulan Ini</p>
+                            <h2 class="text-2xl font-bold text-gray-800">Rp 82.500.000</h2>
+                        </div>
+                        <i class="fas fa-file-invoice-dollar text-green-500 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-lg shadow hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Wilayah Aktif</p>
+                            <h2 class="text-2xl font-bold text-gray-800">12</h2>
+                        </div>
+                        <i class="fas fa-map-marked-alt text-blue-500 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-lg shadow hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Total Denda</p>
+                            <h2 class="text-2xl font-bold text-gray-800">Rp 4.750.000</h2>
+                        </div>
+                        <i class="fas fa-money-bill-wave text-red-500 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Example Table -->
+            <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Wilayah</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Transaksi
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">PT Maju Jaya</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">Lombok Barat</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">Rp 12.000.000</td>
+                            <td class="px-6 py-4 text-sm">
+                                <span
+                                    class="inline-flex px-2 py-1 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">Aktif</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% endblock %}
+        </main>
+
+        <!-- Modal -->
+        <div id="modal" class="fixed inset-0 z-50 hidden" aria-hidden="true" role="dialog" aria-modal="true">
+            <div id="modalOverlay" class="absolute inset-0 bg-black/50"></div>
+            <div class="relative mx-auto w-full max-w-lg p-6">
+                <div class="rounded-lg bg-white shadow-xl">
+                    <div class="flex items-center justify-between border-b p-4">
+                        <h2 class="text-lg font-semibold" id="modalJudul">Judul Modal</h2>
+                        <button id="closeModalBtn"
+                            class="rounded p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                            aria-label="Tutup">✕</button>
+                    </div>
+                    <div class="p-4 space-y-3" id="modalContent"></div>
+                    <div class="flex justify-end gap-2 border-t p-4">
+                        <button id="cancelBtn"
+                            class="rounded px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50">Close</button>
+                        <button id="idOnmodel"
+                            class="rounded px-4 py-2 bg-green-600 text-white hover:bg-green-700">Simpan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% block scripts %}
+    {% endblock %}
+    <script>
+        // Add some interactive functionality
+
+        function createTabelForm(containerId, tableId, titleText, subtitleText, excelFileName, pdfFileName) {
+            const container = document.createElement('div');
+            container.className = 'w-full max-w-6xl mx-auto bg-white rounded-lg shadow-md overflow-hidden border border-gray-200';
+
+            // Header
+            const header = document.createElement('div');
+            header.className = 'flex justify-between bg-indigo-600 text-white px-6 py-4';
+
+            const leftHeader = document.createElement('div');
+            const title = document.createElement('h2');
+            title.className = 'text-xl font-bold';
+            title.textContent = titleText;
+
+            const subtitle = document.createElement('p');
+            subtitle.className = 'text-sm text-indigo-100';
+            subtitle.textContent = subtitleText;
+
+            leftHeader.appendChild(title);
+            leftHeader.appendChild(subtitle);
+
+            const rightHeader = document.createElement('div');
+
+            const excelButton = document.createElement('button');
+            excelButton.className = 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm shadow';
+            excelButton.textContent = 'Excel';
+            excelButton.setAttribute('onclick', `exportExcel('${tableId}', '${excelFileName}')`);
+
+            const pdfButton = document.createElement('button');
+            pdfButton.className = 'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm shadow';
+            pdfButton.textContent = 'PDF';
+            pdfButton.setAttribute('onclick', `exportPDF('${tableId}', '${pdfFileName}')`);
+
+            rightHeader.appendChild(excelButton);
+            rightHeader.appendChild(pdfButton);
+
+            header.appendChild(leftHeader);
+            header.appendChild(rightHeader);
+
+            // Table
+            const table = document.createElement('table');
+            table.id = tableId;
+            table.className = 'min-w-full table-auto border border-gray-300 rounded-lg shadow text-sm';
+
+            // Assemble
+            container.appendChild(header);
+            container.appendChild(table);
+
+            // Append to target container
+            const target = document.getElementById(containerId);
+            if (target) {
+                target.appendChild(container);
+            } else {
+                console.warn(`Container with ID "${containerId}" not found.`);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            checkData();
+
+            const navLinks = document.querySelectorAll("nav a");
+            const currentPath = window.location.pathname;
+
+            // Tandai link aktif berdasarkan URL
+            navLinks.forEach(link => {
+                const href = link.getAttribute("href");
+                if (href === currentPath) {
+                    link.classList.add("bg-gray-700", "text-white");
+                    link.classList.remove("text-gray-300");
+                    const icon = link.querySelector("i");
+                    if (icon) icon.classList.add("text-white");
+                }
+
+                // Tambahkan interaksi klik manual
+                link.addEventListener("click", function () {
+                    navLinks.forEach(l => {
+                        l.classList.remove("bg-gray-700", "text-white");
+                        l.classList.add("text-gray-300");
+                        const icon = l.querySelector("i");
+                        if (icon) icon.classList.remove("text-white");
+                    });
+
+                    this.classList.add("bg-gray-700", "text-white");
+                    this.classList.remove("text-gray-300");
+                    const icon = this.querySelector("i");
+                    if (icon) icon.classList.add("text-white");
+                });
+            });
+
+            // Animasi notifikasi bell
+            const bellIcon = document.querySelector(".fa-bell");
+            if (bellIcon) {
+                setInterval(() => {
+                    bellIcon.classList.add("animate-pulse");
+                    setTimeout(() => {
+                        bellIcon.classList.remove("animate-pulse");
+                    }, 1000);
+                }, 5000);
+            }
+
+            // Efek hover untuk kartu statistik
+            const statsCards = document.querySelectorAll(".hover\\:shadow-md");
+            statsCards.forEach(card => {
+                card.addEventListener("mouseenter", function () {
+                    this.style.transform = "translateY(-2px)";
+                });
+                card.addEventListener("mouseleave", function () {
+                    this.style.transform = "translateY(0)";
+                });
+            });
+
+
+        });
+        function checkData() {
+            fetch(window.location.origin + "/proxy/simtax/data/", {
+                method: "get",
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (typeof data.error === "string" && data.error == 'Not logged in') {
+                        checkData();
+                    }
+                    console.log(data);
+
+                })
+                .catch(err => {
+                    console.error("Fetch error:", err);
+                });
+        }
+
+        function exportExcel(tableId, filename) {
+            const table = document.getElementById(tableId);
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+            XLSX.writeFile(wb, filename);
+        }
+
+        // Ekspor PDF
+        function exportPDF(tableId, filename) {
+            const element = document.getElementById(tableId);
+            html2pdf().from(element).set({ filename: filename }).save();
+        }
+
+
+        // modal 
+        const modal = document.getElementById('modal');
+        const overlay = document.getElementById('modalOverlay');
+        const openBtn = document.getElementById('openModalBtn');
+        const closeBtn = document.getElementById('closeModalBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const idOnmodel = document.getElementById('idOnmodel');
+        idOnmodel.disabled = true;
+        const modalContent = document.getElementById('modalContent');
+        const modalJudul = document.getElementById('modalJudul');
+
+
+        function runModal({ judul = "Judul Form", content = "Ini Form", on = true, btn = {} }) {
+            modalJudul.innerHTML = judul;
+            modalContent.innerHTML = content;
+            if (Object.keys(btn).length != 0) {
+                // {judul,function}
+                idOnmodel.disabled = false;
+                if (btn.judul != undefined) {
+                    idOnmodel.innerHTML = btn.judul;
+                }
+                idOnmodel.addEventListener('click', btn.function);
+            }
+            if (on) {
+                openModal();
+            }
+        }
+
+        // Helper: buka/tutup modal
+        function openModal() {
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+            // optional: fokus ke tombol tutup untuk aksesibilitas
+            setTimeout(() => closeBtn.focus(), 0);
+            // disable scroll body
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+            // re-enable scroll
+            document.body.classList.remove('overflow-hidden');
+            // kembalikan fokus ke trigger
+            openBtn.focus();
+        }
+
+        // Event: buka/tutup
+        // openBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+
+        // Klik di overlay menutup modal
+        overlay.addEventListener('click', closeModal);
+
+        // ESC menutup modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        // Optional: cegah klik dalam panel menutup modal saat bubbling
+        const panel = modal.querySelector('.rounded-lg.bg-white');
+        panel.addEventListener('click', (e) => e.stopPropagation());
+
+
+        let _ = {};
+
+
+        const bulanIndo = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
+        // cek validitas tanggal
+        function isValidDate(dateStr) {
+            const d = new Date(dateStr);
+            return !isNaN(d.getTime()) && dateStr === d.toISOString().slice(0, 10);
+        }
+
+        // format tanggal tunggal
+        function formatDate(dateStr) {
+            if (!isValidDate(dateStr)) return null;
+            const d = new Date(dateStr);
+            const day = String(d.getDate()).padStart(2, "0");
+            const month = bulanIndo[d.getMonth()];
+            const year = d.getFullYear();
+            return `${day} ${month} ${year}`;
+        }
+
+        // format rentang
+        function formatRange(startDate, endDate) {
+            const startFmt = formatDate(startDate);
+            const endFmt = formatDate(endDate);
+            if (!startFmt || !endFmt) return "Tanggal tidak valid";
+            return `${startFmt} - ${endFmt}`;
+        }
+
+    </script>
+</body>
+
+</html>
