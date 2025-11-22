@@ -67,7 +67,7 @@ class Dtransaksi:
                 'objek_nama': 'first',
                 'objek_alamat': 'first',
                 'pengguna_nama':'first',
-                'subjenispajak_nama':'first'
+                'subjenispajak_nama':'first' 
             }).reset_index()
             .rename(columns={'transaksi_jmlhbayardenda': 'pajak','subjenispajak_nama':'jenis'})
         )
@@ -185,3 +185,6 @@ class Dtransaksi:
      
     def delAllTransaksi(self):
         TransaksiPajak.objects.all().delete()
+    def belumBayar(self):
+        return self.dt[self.dt['status_bayar'].fillna(False) == False]
+

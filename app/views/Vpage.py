@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from app.models import TransaksiPajak
+from app.models import TransaksiPajak,TargetPajak
 from django.contrib.auth.decorators import login_required
 
 import pandas as pd
@@ -138,6 +138,45 @@ def denda(request):
     }
     return render(request, 'Ddenda.html', context)
 
+@login_required
+def monitoring(request):
+    
+    _ = Dtransaksi()
+    df_jenis = _.jenisPAD()
+
+    # Ambil data TargetPajak dari database
+    qs = TargetPajak.objects.all().values(
+        'subjenispajak_id', 'subjenispajak_nama', 'target_tahun', 'target_nominal', 'target_id'
+    )
+    df_target = pd.DataFrame(list(qs))
+
+    # Normalisasi nama pajak agar seragam
+    df_jenis['jenis'] = df_jenis['jenis'].str.strip().str.lower()
+    df_target['subjenispajak_nama'] = df_target['subjenispajak_nama'].str.strip().str.lower()
+    df_target['target_nominal'] = df_target['target_nominal'].astype(float)
+    # Merge berdasarkan nama pajak
+    df_combined = pd.merge(
+        df_jenis,
+        df_target[['subjenispajak_nama','target_tahun','target_nominal']],
+        left_on='jenis',
+        right_on='subjenispajak_nama',
+        how='left'
+    )
+
+    # df_combined['target_nominal'] = df_combined['target_nominal'].astype(float)
+    df_combined['persentase'] = (df_combined['pajak'] / df_combined['target_nominal']) * 100
+    # Preview hasil gabungan
+    # print(df_combined.head(10))
+    # selisih antara realisasi pajak dengan target nominal,
+    df_combined['gap'] = df_combined['target_nominal'] - df_combined['pajak']
+
+
+
+    # print(df_combined)
+    context = {
+        'data': dataFrameToJson(df_combined),
+    }
+    return render(request, 'Dmonitor.html', context)
 
 # batas 
 def grafik_plotly_express_duo(df, config):
@@ -243,4 +282,8 @@ def grafik_plotly_PIE(df, config):
 
 
     return plot(fig, output_type='div')
- 
+def safe_number(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0

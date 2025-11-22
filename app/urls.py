@@ -1,5 +1,5 @@
 from django.urls import path,include
-from app.views.Vpage import dashboard,data,pengusaha,denda,wilaya
+from app.views.Vpage import dashboard,data,pengusaha,denda,wilaya,monitoring
 from app.views.Vapi.VAsimtax import simtax_login,simtax_get_transaksi,TransaksiPajakViewSet
 
 
@@ -15,6 +15,8 @@ urlpatterns = [
     path('data', data, name='data'),
     path('denda', denda, name='denda'),
     path('wilaya', wilaya, name='wilaya'),
+    path('monitoring', monitoring, name='monitoring'),
+    
     
     
     path("proxy/simtax/login/", simtax_login),

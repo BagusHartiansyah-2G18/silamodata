@@ -1,4 +1,26 @@
 from django.db import models
+class SimtaxSession(models.Model):
+    cookies = models.JSONField(default=dict)
+    note = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class PotensiEkonomi(models.Model):
+    nama = models.CharField(max_length=200)
+    deskripsi = models.TextField()
+    lokasi = models.CharField(max_length=200)
+    sektor = models.CharField(max_length=100, choices=[
+        ('pertanian', 'Pertanian'),
+        ('pariwisata', 'Pariwisata'),
+        ('industri', 'Industri'),
+        ('perdagangan', 'Perdagangan'),
+        ('lainnya', 'Lainnya'),
+    ])
+    estimasi_nilai = models.DecimalField(max_digits=20, decimal_places=2)
+
+    def __str__(self):
+        return self.nama
+
 class TransaksiPajak(models.Model):
     bulan = models.CharField(max_length=2, null=True, blank=True)
     bulan_huruf = models.CharField(max_length=20, null=True, blank=True)
@@ -51,18 +73,33 @@ class SimtaxSession(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class PotensiEkonomi(models.Model):
-    nama = models.CharField(max_length=200)
-    deskripsi = models.TextField()
-    lokasi = models.CharField(max_length=200)
-    sektor = models.CharField(max_length=100, choices=[
-        ('pertanian', 'Pertanian'),
-        ('pariwisata', 'Pariwisata'),
-        ('industri', 'Industri'),
-        ('perdagangan', 'Perdagangan'),
-        ('lainnya', 'Lainnya'),
-    ])
-    estimasi_nilai = models.DecimalField(max_digits=20, decimal_places=2)
+class TargetPajak(models.Model):
+    target_id = models.CharField(max_length=200, unique=True)
+    subjenispajak_id = models.CharField(max_length=200)
+    subjenispajak_nama = models.CharField(max_length=200)
+    target_tahun = models.PositiveIntegerField()
+    target_nominal = models.DecimalField(max_digits=20, decimal_places=2)
+
+    # def __str__(self):
+    #     return f"{self.subjenispajak_nama} - {self.target_tahun}"
+
+class PotensiBaru(models.Model):
+    id_potensi = models.AutoField(primary_key=True)
+    nama_potensi = models.CharField(max_length=200)
+    deskripsi_potensi = models.TextField(blank=True, null=True)
+    perangkat_daerah_pengusul = models.CharField(max_length=150)
+    lokasi = models.CharField(max_length=150, blank=True, null=True)
+    kategori_sektor = models.CharField(max_length=100, blank=True, null=True)
+    status_perda = models.BooleanField(default=False)  # True jika sudah diatur Perda
+    nomor_perda_terkait = models.CharField(max_length=50, blank=True, null=True)
+    tanggal_input = models.DateTimeField(auto_now_add=True)
+    nilai_estimasi = models.DecimalField(max_digits=20, decimal_places=2, blank=True, null=True)
+    status_verifikasi = models.BooleanField(default=False)
+    catatan_analisis = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Potensi Baru"
+        verbose_name_plural = "Potensi Baru"
 
     def __str__(self):
-        return self.nama
+        return self.nama_potensi
